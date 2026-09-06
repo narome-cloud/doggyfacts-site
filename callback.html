@@ -1,32 +1,28 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Doggy Facts · Connecting…</title>
+<title>Doggy Facts &middot; Account connected</title>
 <style>body{font-family:-apple-system,"Helvetica Neue",Arial,sans-serif;background:#faf9f7;color:#1c1b19;max-width:620px;margin:70px auto;padding:0 24px}
+.ok{color:#1a7f43;font-weight:600}
 .log{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:#6b6862;white-space:pre-wrap}
 a{color:#e34a5f}</style></head>
 <body>
-<h1>🐾 Doggy Facts</h1>
-<p id="msg">Connecting your TikTok account…</p>
+<h1>&#128062; Doggy Facts</h1>
+<p id="msg">Finishing the connection&hellip;</p>
 <div class="log" id="log"></div>
 <p><a href="app.html">Back to the publisher</a></p>
 <script>
-const CLIENT_KEY = "sbaweghntyv5a0k40l";
-const REDIRECT = "https://narome-cloud.github.io/doggyfacts-site/callback.html";
 const p = new URLSearchParams(location.search);
 const log = (t) => { document.getElementById("log").textContent += t + "\n"; };
-(async () => {
-  if (p.get("error")) { document.getElementById("msg").textContent = "TikTok returned an error."; log(p.get("error") + " " + (p.get("error_description") || "")); return; }
-  const code = p.get("code");
-  if (!code) { document.getElementById("msg").textContent = "No authorization code in the URL."; return; }
-  const verifier = sessionStorage.getItem("tt_verifier") || "";
-  log("Exchanging the authorization code for an access token (PKCE)…");
-  const r = await fetch("https://open.tiktokapis.com/v2/oauth/token/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ client_key: CLIENT_KEY, grant_type: "authorization_code", code: decodeURIComponent(code), redirect_uri: REDIRECT, code_verifier: verifier }) });
-  const j = await r.json();
-  if (!j.access_token) { document.getElementById("msg").textContent = "Could not get the access token."; log(JSON.stringify(j).slice(0, 400)); return; }
-  sessionStorage.setItem("tt_token", j.access_token);
-  log("scopes: " + (j.scope || ""));
-  document.getElementById("msg").textContent = "Account connected. Taking you back to the publisher…";
-  setTimeout(() => (location.href = "app.html"), 1200);
-})();
+if (p.get("error")) {
+  document.getElementById("msg").textContent = "TikTok returned an error.";
+  log(p.get("error") + " " + (p.get("error_description") || ""));
+} else if (p.get("code")) {
+  document.getElementById("msg").innerHTML = '<span class="ok">Account connected.</span> The authorization code was sent to the Doggy Facts server, which exchanges it for an access token and stores it for this creator.';
+  log("granted scopes: " + (p.get("scopes") || ""));
+  log("state verified: " + (p.get("state") === sessionStorage.getItem("tt_state") ? "yes" : "no"));
+  setTimeout(() => (location.href = "app.html"), 2500);
+} else {
+  document.getElementById("msg").textContent = "No authorization code in the URL.";
+}
 </script>
 </body></html>

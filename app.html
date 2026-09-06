@@ -70,11 +70,10 @@ async function pkce(){
   return c;
 }
 $("login").onclick = async () => {
-  const challenge = await pkce();
   const state = b64url(crypto.getRandomValues(new Uint8Array(12)));
   sessionStorage.setItem("tt_state", state);
   const u = new URL("https://www.tiktok.com/v2/auth/authorize/");
-  u.search = new URLSearchParams({ client_key: CLIENT_KEY, scope: SCOPES, response_type: "code", redirect_uri: REDIRECT, state, code_challenge: challenge, code_challenge_method: "S256" });
+  u.search = new URLSearchParams({ client_key: CLIENT_KEY, scope: SCOPES, response_type: "code", redirect_uri: REDIRECT, state });
   location.href = u.toString();
 };
 $("logout").onclick = () => { sessionStorage.clear(); location.reload(); };
