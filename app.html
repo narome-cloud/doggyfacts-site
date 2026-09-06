@@ -92,21 +92,26 @@ async function mostrarUsuario(token){
 $("pub").onclick = async () => {
   const token = sessionStorage.getItem("tt_token");
   $("pub").disabled = true; $("log").textContent = "";
-  log("POST /v2/post/publish/video/init/ · source PULL_FROM_URL");
-  const body = { post_info: { title: $("cap").value.slice(0, 2200), privacy_level: "SELF_ONLY", disable_comment: false, video_cover_timestamp_ms: 1000 }, source_info: { source: "PULL_FROM_URL", video_url: VIDEO } };
-  const r = await fetch("https://open.tiktokapis.com/v2/post/publish/video/init/", { method: "POST", headers: { Authorization: "Bearer " + token, "Content-Type": "application/json; charset=UTF-8" }, body: JSON.stringify(body) });
+  log("1/4 · Reading the approved file…");
+  const blob = await (await fetch(VIDEO)).blob();
+  log("    " + (blob.size / 1e6).toFixed(1) + " MB");
+  log("2/4 · POST /v2/post/publish/video/init/ (FILE_UPLOAD, direct post)");
+  const init = { post_info: { title: $("cap").value.slice(0, 2200), privacy_level: "SELF_ONLY", disable_comment: false, video_cover_timestamp_ms: 1000 }, source_info: { source: "FILE_UPLOAD", video_size: blob.size, chunk_size: blob.size, total_chunk_count: 1 } };
+  const r = await fetch("https://open.tiktokapis.com/v2/post/publish/video/init/", { method: "POST", headers: { Authorization: "Bearer " + token, "Content-Type": "application/json; charset=UTF-8" }, body: JSON.stringify(init) });
   const j = await r.json();
-  log(JSON.stringify(j.error?.code === "ok" ? { publish_id: j.data.publish_id } : j).slice(0, 300), j.error?.code === "ok" ? "ok" : "err");
-  if (j.error?.code !== "ok") { $("pub").disabled = false; return; }
-  const id = j.data.publish_id;
-  for (let i = 0; i < 12; i++) {
+  if (j.error?.code !== "ok") { log("    " + JSON.stringify(j.error).slice(0, 220), "err"); $("pub").disabled = false; return; }
+  log("    publish_id " + j.data.publish_id.slice(0, 28) + "…", "ok");
+  log("3/4 · Uploading the video file to TikTok…");
+  const up = await fetch(j.data.upload_url, { method: "PUT", headers: { "Content-Type": "video/mp4", "Content-Range": "bytes 0-" + (blob.size - 1) + "/" + blob.size }, body: blob });
+  log("    HTTP " + up.status, up.ok ? "ok" : "err");
+  log("4/4 · Checking the publish status…");
+  for (let i = 0; i < 15; i++) {
     await new Promise((s) => setTimeout(s, 4000));
-    const sr = await fetch("https://open.tiktokapis.com/v2/post/publish/status/fetch/", { method: "POST", headers: { Authorization: "Bearer " + token, "Content-Type": "application/json; charset=UTF-8" }, body: JSON.stringify({ publish_id: id }) });
-    const sj = await sr.json();
-    const st = sj.data?.status || sj.error?.code;
-    log("status: " + st);
-    if (st === "PUBLISH_COMPLETE") { log("✅ Published to the creator's TikTok account.", "ok"); break; }
-    if (st === "FAILED") { log("❌ " + JSON.stringify(sj.data || sj).slice(0, 200), "err"); break; }
+    const sj = await (await fetch("https://open.tiktokapis.com/v2/post/publish/status/fetch/", { method: "POST", headers: { Authorization: "Bearer " + token, "Content-Type": "application/json; charset=UTF-8" }, body: JSON.stringify({ publish_id: j.data.publish_id }) })).json();
+    const st = sj.data?.status || JSON.stringify(sj.error).slice(0, 120);
+    log("    " + st);
+    if (st === "PUBLISH_COMPLETE") { log("✅ Posted to the creator's TikTok account.", "ok"); break; }
+    if (st === "FAILED") { log("❌ " + JSON.stringify(sj.data).slice(0, 200), "err"); break; }
   }
   $("pub").disabled = false;
 };
