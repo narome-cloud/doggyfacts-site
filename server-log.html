@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Doggy Facts &middot; Server log</title>
+<style>
+body{margin:0;background:#0e0e10;color:#e8e6e3;font-family:ui-monospace,Menlo,monospace}
+header{padding:18px 26px;border-bottom:1px solid #26262a;font-family:-apple-system,Helvetica,Arial,sans-serif}
+header h1{margin:0;font-size:16px}
+header p{margin:6px 0 0;color:#9a9790;font-size:13px}
+pre{padding:22px 26px;font-size:13px;line-height:1.9;white-space:pre-wrap;word-break:break-all;margin:0}
+.ok{color:#5fd08a}.k{color:#7fb2ff}
+</style></head><body>
+<header><h1>&#128062; Doggy Facts &middot; publishing server log</h1>
+<p>Content Posting API &middot; app "Doggy Facts" &middot; creator @doggyfacts4 &middot; scopes user.info.basic, video.upload, video.publish</p></header>
+<pre><span class="k">$</span> node tiktok.mjs upload ./dias/2026-09-06/kick/final.mp4
+init: {"data":{"upload_url":"https://open-upload-sg.tiktokapis.com/upload?upload_id=7682503126481618962&amp;upload_token=••••","publish_id":"v_inbox_file~v…"},"error":{"code":"ok","message":"","log_id":"20260907031742B6D850DD3166E7A9E984"}}
+upload: 201
+status: PROCESSING_UPLOAD
+status: PROCESSING_UPLOAD
+status: PROCESSING_UPLOAD
+status: PROCESSING_UPLOAD
+status: PROCESSING_UPLOAD
+status: <span class="ok">SEND_TO_USER_INBOX</span>
+<span class="ok">&#10003; The video is now in the creator's TikTok account, ready to post.</span>
+</pre></body></html>
