@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://narome-cloud.github.io/doggyfacts-site/sitemap.xml
